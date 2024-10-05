@@ -1,74 +1,99 @@
-import React, { useState } from 'react';
-import { Box, Typography, Avatar, Divider } from '@mui/material';
-import frameImg from "../assetsidframe.png"
-const PreviewID=()=>{
-
+import React, { useState,useEffect } from 'react';
+import { Box, Typography, Avatar, Divider, Button,IconButton,TextField } from '@mui/material';
+import frameImage from "../assets/idframe.png"
+import axios from "axios";
+const loadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+  });
+};
+const sendEmail=async (email,finalImage,setEmail)=>{
+  try{
+const reponse=await axios.post("http://localhost:5000/send-email", {
+        to_email: email,
+        image_data: finalImage,
+      });
+    }
+    catch(err){
+      console.log(err);
+    }
+    setEmail("");
 }
+
+const PreviewID=async(name,rollNo,regNo,Degree,Department,image,setFinalImage)=>{
+  try {
+    const [capturedImg, frameImg] = await Promise.all([
+      loadImage(image),
+      loadImage(frameImage),
+    ]);
+    const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = capturedImg.width;
+      canvas.height = capturedImg.height;
+
+      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(capturedImg, 10, 130, canvas.width - 280, canvas.height-70);
+      ctx.font = "20px sans serif";
+      ctx.fillStyle = "blue";
+      ctx.fillText(name,190,200);
+      console.log(name);
+      ctx.font = "20px Arial";
+      ctx.fillStyle="red"
+      ctx.fillText(rollNo+" / "+regNo,200,240);
+      ctx.fillStyle="green"
+      ctx.fillText(Degree+"/"+Department,200,280);
+      
+      
+      
+
+      const finalImage = canvas.toDataURL("image/png");
+
+      setFinalImage(finalImage);
+  }
+  catch(err){
+console.log("Operation Failed");
+  }
+}
+
 const IDPreview = ({ data,img }) => {
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+  useEffect(()=>{
+    PreviewID(name,rollNo,regNo,degree,department,image,setFinalImage);
+  },[]);
+  const [email,setEmail]=useState(null);
+  const [capturedImage, setCapturedImage] = useState("");
+const [finalImage, setFinalImage] = useState(null);
   const { regNo, name, degree, department, rollNo, validity} = data;
   
   const image=img;
  
   return (
     
-    <Box
-      sx={{
-        width: 300,
-        height: 450,
-        border: '2px solid black',
-        borderRadius: '10px',
-        textAlign: 'center',
-        padding: 2,
-        backgroundColor: '#fff',
-        boxShadow: 3,
-      }}
-    >
-      {/* Header with college name */}
-      <Box sx={{ backgroundColor: '#1976d2', padding: 1 }}>
-        <Typography
-          variant="h6"
-          sx={{ color: 'white', fontWeight: 'bold', textTransform: 'uppercase' }}
-        >
-          Thiagarajar College of Engineering
-        </Typography>
-        <Typography variant="caption" sx={{ color: 'white' }}>
-          (A Govt. Aided Autonomous Institution)
-        </Typography>
-      </Box>
+    <>
+     
+     <Box>
+ <TextField
+            
+            label="Enter your email"
+            type="email"
+            value={email}
+            onChange={handleEmailChange}
+            sx={{ mb: 2 }}
+          />
+           <Button onClick={() =>{console.log("email",email);sendEmail(email,finalImage,setEmail)}} variant="outlined" color="success">
+ Send Email
+</Button> 
+</Box>
+ {finalImage&& <img src={finalImage}/>}
 
-      {/* Profile Image */}
-      <img 
-        src={image}
-        alt={name}
-        style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "50%", marginBottom: "16px" }}
-      />
+ </>
 
-      {/* Personal Information */}
-      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-        {name}
-      </Typography>
-      <Typography variant="body2">Reg No: {regNo}</Typography>
-      <Typography variant="body2">Roll No: {rollNo}</Typography>
-      <Typography variant="body2">{degree}</Typography>
-      <Typography variant="body2">{department}</Typography>
-
-      <Divider sx={{ my: 1 }} />
-
-    
-
-      {/* Validity */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="caption">Valid Upto: {validity}</Typography>
-      </Box>
-
-      {/* Signature and Principal */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-          Signature of Principal
-        </Typography>
-        <Divider sx={{ width: '70%', mx: 'auto', my: 1 }} />
-      </Box>
-    </Box>
   );
 };
 

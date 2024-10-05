@@ -63,7 +63,7 @@ const WebcamCapture = ({onCapture}) => {
       canvas.height = capturedImg.height;
 
       //ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-      ctx.drawImage(capturedImg, 50, 50, canvas.width - 100, canvas.height - 100);
+      ctx.drawImage(capturedImg,0,0, canvas.width-100 , canvas.height-100);
 
       ctx.font = "20px Celandine";
       ctx.fillStyle = "black";
@@ -73,10 +73,7 @@ const WebcamCapture = ({onCapture}) => {
 
       setFinalImage(finalImage);
 
-      // await axios.post("http://localhost:5000/send-email", {
-      //   to_email: email,
-      //   image_data: finalImage,
-      // });
+      
 
       // Show confetti after success
       setShowConfetti(true);
@@ -157,14 +154,7 @@ onCapture(finalImage);
           </Box>
 
           
-          {/* <TextField
-            fullWidth
-            label="Enter your email"
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            sx={{ mb: 2 }}
-          /> */}
+        
         </DialogContent>
         <DialogActions>
           <Button onClick={handleSendEmail} variant="contained" color="success">

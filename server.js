@@ -28,8 +28,8 @@ app.post('/send-email',(req,res)=>{
   const mailOptions={
     from: process.env.EMAIL,
     to: to_email,
-    subject: 'Your Captured Image with Custom Text',
-    html: '<h3>Here is your photo with the custom text!</h3>',
+    subject: 'Your Id ',
+    html: '',
     attachments: [
       {
         filename: 'custom-image.png',
