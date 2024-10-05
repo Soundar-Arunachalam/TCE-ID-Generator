@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Avatar, Divider } from '@mui/material';
-import QRCode from 'qrcode.react';
+import frameImg from "../assetsidframe.png"
+const PreviewID=()=>{
 
-const IDPreview = ({ data }) => {
-  const { regNo, name, degree, department, rollNo, validity, image } = data;
-
+}
+const IDPreview = ({ data,img }) => {
+  const { regNo, name, degree, department, rollNo, validity} = data;
+  
+  const image=img;
+ 
   return (
+    
     <Box
       sx={{
         width: 300,
@@ -32,10 +37,10 @@ const IDPreview = ({ data }) => {
       </Box>
 
       {/* Profile Image */}
-      <Avatar
+      <img 
         src={image}
         alt={name}
-        sx={{ width: 80, height: 80, margin: '10px auto' }}
+        style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "50%", marginBottom: "16px" }}
       />
 
       {/* Personal Information */}
@@ -49,8 +54,7 @@ const IDPreview = ({ data }) => {
 
       <Divider sx={{ my: 1 }} />
 
-      {/* QR Code */}
-      <QRCode value={`${regNo}-${degree}-${department}`} size={80} />
+    
 
       {/* Validity */}
       <Box sx={{ mt: 2 }}>

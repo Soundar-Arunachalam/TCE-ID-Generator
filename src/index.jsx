@@ -9,12 +9,12 @@ import './style/index.css';
 import App from './components/App';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Header />
+    
     <div className="main-content">
-      <SidePanel side="left" />
+      
       
       <App/>
-      <SidePanel side="right" />
+      
     </div>
   </StrictMode>,
 );

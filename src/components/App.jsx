@@ -1,16 +1,20 @@
+// App.js
 import React, { useState } from "react";
-import { Box, Button, Typography, Stepper, Step, StepLabel } from "@mui/material";
-import StudentForm from "./StudentForm"; // Import your student form component
-import FacultyForm from "./FacultyForm"; // Import your faculty form component
+import { Box, Button, Typography, Stepper, Step, StepLabel, ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import StudentForm from "./StudentForm"; 
+import FacultyForm from "./FacultyForm"; 
 import WebcamCapture from "./webcamcapture";
-
+import Header from "./header"; // Ensure only one header is imported
+import IDPreview from "./IDPreview";
 const steps = ["User Type", "Details Form", "Capture Image", "Preview ID"];
 
 const App = () => {
+
   const [activeStep, setActiveStep] = useState(0);
   const [userType, setUserType] = useState("");
   const [formData, setFormData] = useState({});
   const [capturedImage, setCapturedImage] = useState(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -22,17 +26,21 @@ const App = () => {
 
   const handleFormSubmit = (data) => {
     setFormData(data);
-    handleNext(); // Move to the next step after form submission
+    handleNext();
   };
 
   const handleUserTypeSelection = (type) => {
     setUserType(type);
-    handleNext(); // Move to the next step after selecting user type
+    handleNext();
   };
 
   const handleImageCapture = (imageSrc) => {
     setCapturedImage(imageSrc);
-    handleNext(); // Move to the preview step after capturing image
+    handleNext();
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
   };
 
   const renderStepContent = (step) => {
@@ -66,63 +74,75 @@ const App = () => {
               Capture your Image
             </Typography>
             <WebcamCapture onCapture={handleImageCapture} />
-            <Button variant="contained" onClick={handleBack} sx={{ mt: 2 }}>
-              Back
-            </Button>
+  
+            {/* Add Next and Back buttons */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Button variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
+                Back
+              </Button>
+              <Button 
+                variant="contained" 
+                onClick={handleNext} 
+                  disabled={!capturedImage}// Disable Next until image is captured
+                sx={{ ml: 2 }}
+              >
+                Next
+              </Button>
+            </Box>
           </Box>
         );
       case 3:
-        return (
-          <Box sx={{ textAlign: "center" }}>
-            <Typography variant="h6" align="center">
-              Preview ID Card
-            </Typography>
-            <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-              <Box
-                sx={{
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  width: "300px",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <img
-                  src={capturedImage}
-                  alt="Captured"
-                  style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "50%", marginBottom: "16px" }}
-                />
-                <Typography variant="h6">{formData.name || formData.fatherName}</Typography>
-                <Typography variant="body1">RegNo: {formData.regNo || formData.facultyId}</Typography>
-                <Typography variant="body1">Department: {formData.department}</Typography>
-              </Box>
-            </Box>
-            <Button variant="contained" color="primary" onClick={handleBack} sx={{ mt: 3 }}>
-              Back
-            </Button>
-          </Box>
-        );
-      default:
-        return null;
-    }
-  };
+        console.log("Preview: ", { formData, capturedImage });
+
+      if (!formData || !capturedImage) {
+        return <Typography variant="body1" align="center">Missing data, please go back and try again.</Typography>;
+      }
+
+      return (
+        <Box sx={{ textAlign: "center" }}>
+          
+            
+          <IDPreview data={formData} img={capturedImage}/>
+          <Button variant="contained" color="primary" onClick={handleBack} sx={{ mt: 3 }}>
+            Back
+          </Button>
+        </Box>
+      );
+    default:
+      return null;
+  }
+};
+
+  // Define a custom color palette for light and dark modes
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? "dark" : "light",
+      primary: {
+        main: darkMode ? "#90caf9" : "#1976d2",
+      },
+      secondary: {
+        main: darkMode ? "#f48fb1" : "#d32f2f",
+      },
+    },
+  });
 
   return (
-    <Box sx={{ width: "100%", mt: 5 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <Box sx={{ mt: 5 }}>
-        {renderStepContent(activeStep)}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Header toggleDarkMode={toggleDarkMode} />
+      <Box sx={{ width: "100%", mt: 5 }}>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <Box sx={{ mt: 5 }}>
+          {renderStepContent(activeStep)}
+        </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 };
 

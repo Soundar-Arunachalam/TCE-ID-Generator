@@ -3,10 +3,11 @@ import Webcam from "react-webcam";
 import axios from "axios";
 import "../style/webcam.css";
 import Confetti from 'react-confetti';
+import image from '../assets/frame.png';
 import { Button, TextField, Box, Dialog, DialogTitle, DialogContent, DialogActions, Typography, IconButton } from '@mui/material';
 import { Brightness4, Contrast, FilterVintage } from '@mui/icons-material'; // MUI Icons for filters
-
-const WebcamCapture = () => {
+const frameImage = image;
+const WebcamCapture = ({onCapture}) => {
   const webcamRef = useRef(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [finalImage, setFinalImage] = useState(null);
@@ -36,14 +37,72 @@ const WebcamCapture = () => {
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
-
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+    });
+  };
   const handleSendEmail = async () => {
-    if (!email) {
-      alert("Please enter an email.");
-      return;
+    // if (!email) {
+    //   alert("Please enter an email.");
+    //   return;
+    // }
+    try {
+      const [capturedImg, frameImg] = await Promise.all([
+        loadImage(capturedImage),
+        loadImage(frameImage),
+      ]);
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = capturedImg.width;
+      canvas.height = capturedImg.height;
+
+      //ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(capturedImg, 50, 50, canvas.width - 100, canvas.height - 100);
+
+      ctx.font = "20px Celandine";
+      ctx.fillStyle = "black";
+      ctx.fillText(customText, 20, canvas.height - 20);
+
+      const finalImage = canvas.toDataURL("image/png");
+
+      setFinalImage(finalImage);
+
+      // await axios.post("http://localhost:5000/send-email", {
+      //   to_email: email,
+      //   image_data: finalImage,
+      // });
+
+      // Show confetti after success
+      setShowConfetti(true);
+      
+      // Show notification
+      setNotification("success");
+onCapture(finalImage);
+      // Hide confetti and notification after 5 seconds
+      setTimeout(() => {
+        setShowConfetti(false);
+        setNotification(null);
+      }, 5000);
+    } catch (error) {
+      console.error("Error sending email:", error);
+      setNotification("Failed to send email. Try again later.");
+      setTimeout(() => setNotification(null), 5000);
     }
 
-    // Logic for sending the email remains the same
+    setCustomText("");
+    setEmail("");
+    setCapturedImage(null);
+    setFinalImage(null);
+    setIsPopupVisible(false); 
+  
+
+    
   };
 
   return (
@@ -97,25 +156,19 @@ const WebcamCapture = () => {
             </IconButton>
           </Box>
 
-          <TextField
-            fullWidth
-            label="Enter your custom text"
-            value={customText}
-            onChange={handleTextChange}
-            sx={{ my: 2 }}
-          />
-          <TextField
+          
+          {/* <TextField
             fullWidth
             label="Enter your email"
             type="email"
             value={email}
             onChange={handleEmailChange}
             sx={{ mb: 2 }}
-          />
+          /> */}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleSendEmail} variant="contained" color="success">
-            Send to Email
+            Save
           </Button>
           <Button onClick={() => setIsPopupVisible(false)} variant="outlined" color="secondary">
             Cancel
